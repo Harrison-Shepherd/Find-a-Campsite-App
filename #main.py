@@ -1,16 +1,21 @@
-#main.py
+# main.py
+
 from Models.redis_client import RedisClient
 from Models.account import Account
 from Utils.data_loader import DataLoader
 
 def main():
+    """
+    Main function to handle user interactions for account management.
+    Connects to Redis, initializes the account manager, and optionally loads initial data.
+    """
     try:
-        # Create Redis Client directly without using get_client
+        # Create a Redis Client directly
         redis_client = RedisClient(
             host='mycampsiteredis.redis.cache.windows.net',
             port=6380,
             password='F21P4lrm3B63A5nNWUldt528Usqtped65AzCaNnjtg8=',
-            ssl=True  # Ensure SSL is enabled if required by your Redis server
+            ssl=True
         ).client  # Access the client directly
     except Exception as e:
         print(f"Failed to connect to Redis: {e}")
@@ -28,9 +33,10 @@ def main():
     except Exception as e:
         print(f"Error loading initial data: {e}")
 
+    # Main loop for user interaction
     while True:
         print("\n1. Create Account\n2. Login\n3. Forgot Password\n4. Exit")
-        choice = input("Enter your choice: ").strip().lower()  # Stripping spaces and converting input to lowercase
+        choice = input("Enter your choice: ").strip().lower()  # Normalize input
 
         # Create Account Option
         if choice in ['1', 'create account']:
@@ -55,10 +61,9 @@ def main():
             print("Exiting...")
             break
 
-        # Invalid Input Handling
+        # Handle Invalid Input
         else:
             print("Invalid choice. Please try again.")
 
 if __name__ == "__main__":
     main()
-

@@ -14,26 +14,26 @@ class Account:
 
     def create_account(self, login_name, password, first_name):
         """
-        Creates a new user account in Redis with custom security question.
+        Creates a new user account in Redis with a custom security question.
         
         Args:
-            login_name (str): The user's login name.
+            login_name (str): The user's login name or email.
             password (str): The user's password.
             first_name (str): The user's first name.
         """
         if self.redis_client.exists(login_name):
             print("Account already exists.")
         else:
-            # Ask for a custom security question
+            # Prompt the user for a custom security question and answer.
             security_question = input("Enter your custom security question: ").strip()
             security_answer = input(f"{security_question} ").strip()
             
-            # Hash the password before storing it
+            # Hash the password using bcrypt for secure storage.
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
             
-            # Store the account details in Redis without encrypting the security answer
+            # Store the account details in Redis, including the plain security answer.
             self.redis_client.hset(login_name, mapping={
-                'password': hashed_password.decode('utf-8'),  # Store as string
+                'password': hashed_password.decode('utf-8'),  # Convert bytes to string for Redis storage
                 'first_name': first_name,
                 'security_question': security_question,
                 'security_answer': security_answer  # Store as plain text
@@ -42,20 +42,20 @@ class Account:
 
     def login(self, login_name, password):
         """
-        Validates the user's login credentials.
+        Validates the user's login credentials against the stored data in Redis.
         
         Args:
-            login_name (str): The user's login name.
+            login_name (str): The user's login name or email.
             password (str): The user's password.
             
         Returns:
             bool: True if login is successful, False otherwise.
         """
         if self.redis_client.exists(login_name):
-            stored_password = self.redis_client.hget(login_name, 'password')
-            # Convert stored password back to bytes for bcrypt
-            stored_password = stored_password.encode('utf-8')  # Convert back to bytes
-            # Verify the hashed password
+            # Retrieve the stored hashed password from Redis.
+            stored_password = self.redis_client.hget(login_name, 'password').encode('utf-8')
+            
+            # Verify the provided password against the stored hash using bcrypt.
             if bcrypt.checkpw(password.encode('utf-8'), stored_password):
                 print("Login successful!")
                 return True
@@ -76,43 +76,35 @@ class Account:
         Returns:
             bool: True if password reset is successful, False otherwise.
         """
-        print("Starting forgot_password process...")
         if self.redis_client.exists(login_name):
-            # Retrieve the security question and answer
+            # Retrieve the security question and answer from Redis
             security_question = self.redis_client.hget(login_name, 'security_question')
             stored_security_answer = self.redis_client.hget(login_name, 'security_answer')
 
-            # Decode stored answer if needed
+            # Decode the stored answer if it is in bytes
             if isinstance(stored_security_answer, bytes):
                 stored_security_answer = stored_security_answer.decode('utf-8')
 
-            # Check if the security question and answer are retrieved properly
-            print(f"Retrieved security question: {security_question}")
-            print(f"Retrieved stored security answer: {stored_security_answer}")
-
+            # Validate that the security question and answer exist
             if not security_question or not stored_security_answer:
                 print("Security question or answer not set up correctly.")
                 return False
 
-            # Ask the stored security question
-            print("Prompting for security answer...")
+            # Prompt the user for their answer to the security question
             user_answer = input(f"{security_question} ").strip()
-            print(f"User provided answer: '{user_answer}'")
 
-            # Verify the security answer
-            print(f"Comparing user answer '{user_answer}' with stored answer '{stored_security_answer}'...")
+            # Compare the user's answer with the stored answer
             if user_answer == stored_security_answer:
-                # Request the new password and confirmation
-                print("Security answer correct. Prompting for new password...")
+                # Prompt for a new password and its confirmation
                 new_password = input("Enter your new password: ").strip()
                 confirm_password = input("Confirm your new password: ").strip()
 
-                # Check if passwords match
+                # Check if the new passwords match
                 if new_password != confirm_password:
                     print("Passwords do not match. Try again.")
                     return False
 
-                # Hash and update the password
+                # Hash the new password and update it in Redis
                 hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
                 self.redis_client.hset(login_name, mapping={'password': hashed_password.decode('utf-8')})
                 print("Password updated successfully.")
