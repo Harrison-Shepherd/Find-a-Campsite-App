@@ -76,19 +76,45 @@ class Account:
         Returns:
             bool: True if password reset is successful, False otherwise.
         """
+        print("Starting forgot_password process...")
         if self.redis_client.exists(login_name):
-            # Retrieve the security question directly as a string
+            # Retrieve the security question and answer
             security_question = self.redis_client.hget(login_name, 'security_question')
             stored_security_answer = self.redis_client.hget(login_name, 'security_answer')
 
+            # Decode stored answer if needed
+            if isinstance(stored_security_answer, bytes):
+                stored_security_answer = stored_security_answer.decode('utf-8')
+
+            # Check if the security question and answer are retrieved properly
+            print(f"Retrieved security question: {security_question}")
+            print(f"Retrieved stored security answer: {stored_security_answer}")
+
+            if not security_question or not stored_security_answer:
+                print("Security question or answer not set up correctly.")
+                return False
+
             # Ask the stored security question
+            print("Prompting for security answer...")
             user_answer = input(f"{security_question} ").strip()
+            print(f"User provided answer: '{user_answer}'")
 
             # Verify the security answer
+            print(f"Comparing user answer '{user_answer}' with stored answer '{stored_security_answer}'...")
             if user_answer == stored_security_answer:
+                # Request the new password and confirmation
+                print("Security answer correct. Prompting for new password...")
                 new_password = input("Enter your new password: ").strip()
+                confirm_password = input("Confirm your new password: ").strip()
+
+                # Check if passwords match
+                if new_password != confirm_password:
+                    print("Passwords do not match. Try again.")
+                    return False
+
+                # Hash and update the password
                 hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
-                self.redis_client.hset(login_name, 'password', hashed_password)
+                self.redis_client.hset(login_name, mapping={'password': hashed_password.decode('utf-8')})
                 print("Password updated successfully.")
                 return True
             else:
@@ -97,3 +123,4 @@ class Account:
         else:
             print("Account does not exist.")
             return False
+
