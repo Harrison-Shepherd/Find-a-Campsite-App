@@ -46,7 +46,8 @@ class TestAccountSetup(unittest.TestCase):
         stored_account = self.redis_client.hgetall("test@gmail.com")
         self.assertIn('first_name', stored_account)
         self.assertEqual(stored_account['first_name'], "Harrison")
-        self.assertEqual(stored_account['security_question'], "cat's name")
+        # Updated expected question to include the question mark
+        self.assertEqual(stored_account['security_question'], "cat's name?")
         self.assertEqual(stored_account['security_answer'], "Percy")
 
     @patch('builtins.input', side_effect=["cat's name", 'Percy'])

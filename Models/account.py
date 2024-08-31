@@ -14,26 +14,31 @@ class Account:
 
     def create_account(self, login_name, password, first_name):
         """
-        Creates a new user account in Redis with a custom security question.
+        Creates a new user account in Redis with custom security question.
         
         Args:
-            login_name (str): The user's login name or email.
+            login_name (str): The user's login name.
             password (str): The user's password.
             first_name (str): The user's first name.
         """
         if self.redis_client.exists(login_name):
             print("Account already exists.")
         else:
-            # Prompt the user for a custom security question and answer.
+            # Ask for a custom security question
             security_question = input("Enter your custom security question: ").strip()
+
+            # Ensure the security question ends with a question mark
+            if not security_question.endswith('?'):
+                security_question += '?'
+
             security_answer = input(f"{security_question} ").strip()
             
-            # Hash the password using bcrypt for secure storage.
+            # Hash the password before storing it
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
             
-            # Store the account details in Redis, including the plain security answer.
+            # Store the account details in Redis
             self.redis_client.hset(login_name, mapping={
-                'password': hashed_password.decode('utf-8'),  # Convert bytes to string for Redis storage
+                'password': hashed_password.decode('utf-8'),  # Store as string
                 'first_name': first_name,
                 'security_question': security_question,
                 'security_answer': security_answer  # Store as plain text
@@ -90,6 +95,10 @@ class Account:
                 print("Security question or answer not set up correctly.")
                 return False
 
+            # Ensure the security question ends with a question mark
+            if not security_question.endswith('?'):
+                security_question += '?'
+
             # Prompt the user for their answer to the security question
             user_answer = input(f"{security_question} ").strip()
 
@@ -115,4 +124,5 @@ class Account:
         else:
             print("Account does not exist.")
             return False
+
 
