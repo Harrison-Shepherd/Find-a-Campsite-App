@@ -1,10 +1,9 @@
 # GUI/gui_logic.py
 
 from tkinter import messagebox
-from ..Models.redis_client import RedisClient
-from ..Models.account import Account
-from ..Utils.data_loader import DataLoader
-
+from Models.redis_client import RedisClient
+from Models.account import Account
+from Utils.data_loader import DataLoader
 
 
 class AppLogic:
@@ -42,33 +41,80 @@ class AppLogic:
         """
         Handles account creation logic.
         """
-        self.account_manager.create_account(login_name, password, first_name, security_question, security_answer)
+        if not all([login_name, password, first_name, security_question, security_answer]):
+            messagebox.showerror("Error", "All fields are required.")
+            return False
+
+        try:
+            self.account_manager.create_account(login_name, password, first_name, security_question, security_answer)
+            messagebox.showinfo("Success", "Account created successfully.")
+            return True
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to create account: {e}")
+            return False
 
     def login(self, login_name, password):
         """
         Handles login logic.
         """
+        if not login_name or not password:
+            messagebox.showerror("Error", "Login name and password are required.")
+            return False
+
         if self.account_manager.login(login_name, password):
             messagebox.showinfo("Login", "Login successful!")
+            return True
         else:
             messagebox.showerror("Login Failed", "Incorrect login credentials.")
+            return False
 
     def forgot_password(self, login_name):
         """
-        Handles the retrieval of security question for password reset.
+        Handles the retrieval of the security question for password reset.
         """
+        if not login_name:
+            messagebox.showerror("Error", "Login name is required.")
+            return None
+
+        # Fetch the security question from Redis
         security_question = self.redis_client.hget(login_name, 'security_question')
         if security_question:
-            return security_question
+            return security_question  # No need to decode; it's already a string
         else:
             messagebox.showerror("Error", "Account does not exist or security question not set up.")
             return None
+
 
     def reset_password(self, login_name, security_answer, new_password, confirm_password):
         """
         Handles the actual password reset process.
         """
+        if not all([login_name, security_answer, new_password, confirm_password]):
+            messagebox.showerror("Error", "All fields are required.")
+            return False
+
+        if new_password != confirm_password:
+            messagebox.showerror("Error", "Passwords do not match.")
+            return False
+
         if self.account_manager.forgot_password(login_name, security_answer, new_password, confirm_password):
             messagebox.showinfo("Success", "Password updated successfully.")
+            return True
         else:
             messagebox.showerror("Error", "Failed to reset password. Please check your security answer and try again.")
+            return False
+
+    def handle_forgot_password(self, login_name):
+        """
+        Handles the entire forgot password flow from fetching the security question to resetting the password.
+        """
+        security_question = self.forgot_password(login_name)
+        if security_question:
+            return security_question
+        return None
+
+    def handle_reset_password(self, login_name, security_answer, new_password, confirm_password):
+        """
+        Completes the password reset process.
+        """
+        return self.reset_password(login_name, security_answer, new_password, confirm_password)
