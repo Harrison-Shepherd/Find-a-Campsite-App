@@ -54,7 +54,10 @@ def main():
         # Forgot Password Option
         elif choice in ['3', 'forgot password']:
             login_name = input("Enter login name (email): ").strip()
-            account_manager.forgot_password(login_name)
+            user_answer = input("Enter your answer to the security question: ").strip()
+            new_password = input("Enter your new password: ").strip()
+            confirm_password = input("Confirm your new password: ").strip()
+            account_manager.forgot_password(login_name, user_answer, new_password, confirm_password)
 
         # Exit Option
         elif choice in ['4', 'exit']:

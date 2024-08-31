@@ -58,32 +58,20 @@ class TestPasswordReset(unittest.TestCase):
 
         # Create a test account with the specified details
         self.account_manager.create_account(
-            login_name="test@gmail.com",
-            password="testpw123",
-            first_name="Harrison"
+            "test@gmail.com",
+            "testpw123",
+            "Harrison",
+            "cat's name?",
+            "Percy"
         )
 
-        # Set custom security question and answer directly in Redis
-        self.redis_client.hset("test@gmail.com", mapping={
-            "security_question": "cat's name",
-            "security_answer": "Percy"
-        })
-
-        # Check stored security details in Redis for verification
-        stored_security_question = self.redis_client.hget("test@gmail.com", 'security_question')
-        stored_security_answer = self.redis_client.hget("test@gmail.com", 'security_answer')
-        logging.debug(f"Stored security question: '{stored_security_question}'")
-        logging.debug(f"Stored security answer: '{stored_security_answer}'")
-
         # Attempt to reset the password with the correct answer
-        result = self.account_manager.forgot_password("test@gmail.com")
-
-        # Check the result of the password reset attempt
-        logging.debug(f"Password reset result: {result}")
-
-        # Verify the account details after the reset attempt
-        stored_account = self.redis_client.hgetall("test@gmail.com")
-        logging.debug(f"Stored account after password reset attempt: {stored_account}")
+        result = self.account_manager.forgot_password(
+            "test@gmail.com",
+            user_answer="Percy",
+            new_password="new_password_123",
+            confirm_password="new_password_123"
+        )
 
         # Assert that the password reset was successful
         self.assertTrue(result)
@@ -98,20 +86,20 @@ class TestPasswordReset(unittest.TestCase):
 
         # Create a test account with a security question and answer
         self.account_manager.create_account(
-            login_name="test@gmail.com",
-            password="testpw123",
-            first_name="Harrison"
+            "test@gmail.com",
+            "testpw123",
+            "Harrison",
+            "cat's name?",
+            "Percy"
         )
 
-        # Set the custom security question and answer in Redis
-        self.redis_client.hset("test@gmail.com", mapping={
-            "security_question": "cat's name",
-            "security_answer": "Percy"
-        })
-
         # Attempt to reset the password with the incorrect answer
-        result = self.account_manager.forgot_password("test@gmail.com")
-        logging.warning(f"Password reset result with incorrect answer: {result}")
+        result = self.account_manager.forgot_password(
+            "test@gmail.com",
+            user_answer="wronganswer",
+            new_password="new_password_123",
+            confirm_password="new_password_123"
+        )
 
         # Assert that the password reset was unsuccessful
         self.assertFalse(result)

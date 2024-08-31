@@ -1,6 +1,5 @@
-# models/account.py
-
 import bcrypt
+import re
 
 class Account:
     def __init__(self, redis_client):
@@ -12,38 +11,60 @@ class Account:
         """
         self.redis_client = redis_client
 
-    def create_account(self, login_name, password, first_name):
+    def create_account(self, login_name, password, first_name, security_question=None, security_answer=None):
         """
         Creates a new user account in Redis with custom security question.
         
         Args:
-            login_name (str): The user's login name.
+            login_name (str): The user's login name or email.
             password (str): The user's password.
             first_name (str): The user's first name.
+            security_question (str, optional): The custom security question provided by the user.
+            security_answer (str, optional): The answer to the custom security question.
         """
+        # Check if the provided login name is a valid email address
+        if not self.is_valid_email(login_name):
+            print("Invalid email format. Please enter a valid email address.")
+            return
+
         if self.redis_client.exists(login_name):
             print("Account already exists.")
         else:
-            # Ask for a custom security question
-            security_question = input("Enter your custom security question: ").strip()
-
+            # If no security question is provided, prompt the user (CLI compatibility)
+            if not security_question:
+                security_question = input("Enter your custom security question: ").strip()
+            
             # Ensure the security question ends with a question mark
             if not security_question.endswith('?'):
                 security_question += '?'
 
-            security_answer = input(f"{security_question} ").strip()
+            # If no security answer is provided, prompt the user (CLI compatibility)
+            if not security_answer:
+                security_answer = input(f"{security_question} ").strip()
             
             # Hash the password before storing it
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
             
             # Store the account details in Redis
             self.redis_client.hset(login_name, mapping={
-                'password': hashed_password.decode('utf-8'),  # Store as string
+                'password': hashed_password.decode('utf-8'),
                 'first_name': first_name,
                 'security_question': security_question,
-                'security_answer': security_answer  # Store as plain text
+                'security_answer': security_answer
             })
             print("Account created successfully.")
+
+    def is_valid_email(self, email):
+        """
+        Validates the email format.
+        
+        Args:
+            email (str): The email address to validate.
+        
+        Returns:
+            bool: True if email is valid, False otherwise.
+        """
+        return bool(re.match(r"[^@]+@[^@]+\.[^@]+", email))
 
     def login(self, login_name, password):
         """
@@ -71,43 +92,34 @@ class Account:
             print("Account does not exist.")
             return False
 
-    def forgot_password(self, login_name):
+    def forgot_password(self, login_name, user_answer, new_password, confirm_password):
         """
         Handles password recovery using a custom security question.
 
         Args:
             login_name (str): The user's login name.
+            user_answer (str): The user's answer to the security question.
+            new_password (str): The new password provided by the user.
+            confirm_password (str): Confirmation of the new password.
 
         Returns:
             bool: True if password reset is successful, False otherwise.
         """
         if self.redis_client.exists(login_name):
             # Retrieve the security question and answer from Redis
-            security_question = self.redis_client.hget(login_name, 'security_question')
             stored_security_answer = self.redis_client.hget(login_name, 'security_answer')
 
             # Decode the stored answer if it is in bytes
             if isinstance(stored_security_answer, bytes):
                 stored_security_answer = stored_security_answer.decode('utf-8')
 
-            # Validate that the security question and answer exist
-            if not security_question or not stored_security_answer:
+            # Validate that the security answer exists
+            if not stored_security_answer:
                 print("Security question or answer not set up correctly.")
                 return False
 
-            # Ensure the security question ends with a question mark
-            if not security_question.endswith('?'):
-                security_question += '?'
-
-            # Prompt the user for their answer to the security question
-            user_answer = input(f"{security_question} ").strip()
-
             # Compare the user's answer with the stored answer
             if user_answer == stored_security_answer:
-                # Prompt for a new password and its confirmation
-                new_password = input("Enter your new password: ").strip()
-                confirm_password = input("Confirm your new password: ").strip()
-
                 # Check if the new passwords match
                 if new_password != confirm_password:
                     print("Passwords do not match. Try again.")
@@ -124,5 +136,3 @@ class Account:
         else:
             print("Account does not exist.")
             return False
-
-

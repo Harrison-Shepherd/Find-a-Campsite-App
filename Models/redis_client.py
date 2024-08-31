@@ -1,5 +1,3 @@
-# models/redis_client.py
-
 import redis
 
 class RedisClient:
@@ -39,7 +37,11 @@ class RedisClient:
         Returns:
             bool: True if the key exists, False otherwise.
         """
-        return self.client.exists(key) > 0 if self.client else False
+        try:
+            return self.client.exists(key) > 0 if self.client else False
+        except redis.ConnectionError as e:
+            print(f"Error checking key existence: {e}")
+            return False
 
     def hgetall(self, key):
         """
@@ -51,7 +53,11 @@ class RedisClient:
         Returns:
             dict: A dictionary of fields and values.
         """
-        return self.client.hgetall(key) if self.client else {}
+        try:
+            return self.client.hgetall(key) if self.client else {}
+        except redis.ConnectionError as e:
+            print(f"Error retrieving data: {e}")
+            return {}
 
     def hget(self, key, field):
         """
@@ -64,7 +70,11 @@ class RedisClient:
         Returns:
             str: The value of the field, or None if the field does not exist.
         """
-        return self.client.hget(key, field) if self.client else None
+        try:
+            return self.client.hget(key, field) if self.client else None
+        except redis.ConnectionError as e:
+            print(f"Error retrieving field data: {e}")
+            return None
 
     def hset(self, key, mapping):
         """
@@ -77,7 +87,11 @@ class RedisClient:
         Returns:
             int: The number of fields that were added.
         """
-        return self.client.hset(key, mapping=mapping) if self.client else 0
+        try:
+            return self.client.hset(key, mapping=mapping) if self.client else 0
+        except redis.ConnectionError as e:
+            print(f"Error setting data: {e}")
+            return 0
 
     def delete(self, key):
         """
@@ -89,7 +103,11 @@ class RedisClient:
         Returns:
             int: The number of keys that were removed.
         """
-        return self.client.delete(key) if self.client else 0
+        try:
+            return self.client.delete(key) if self.client else 0
+        except redis.ConnectionError as e:
+            print(f"Error deleting key: {e}")
+            return 0
 
     def keys(self, pattern="*"):
         """
@@ -101,4 +119,8 @@ class RedisClient:
         Returns:
             list: List of matching keys.
         """
-        return self.client.keys(pattern) if self.client else []
+        try:
+            return self.client.keys(pattern) if self.client else []
+        except redis.ConnectionError as e:
+            print(f"Error listing keys: {e}")
+            return []
