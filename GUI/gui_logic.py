@@ -1,5 +1,4 @@
-# GUI/gui_logic.py
-
+import bcrypt  # Add this import for bcrypt
 from tkinter import messagebox
 from Models.redis_client import RedisClient
 from Models.account import Account
@@ -18,7 +17,7 @@ class AppLogic:
             ).client
             self.account_manager = Account(self.redis_client)
 
-            # Load initial data from CSV (no pop-up)
+            # Load initial data from CSV (optional)
             self.load_initial_data()
 
         except Exception as e:
@@ -68,9 +67,9 @@ class AppLogic:
             messagebox.showerror("Login Failed", "Incorrect login credentials.")
             return False
 
-    def forgot_password(self, login_name):
+    def handle_forgot_password(self, login_name):
         """
-        Handles the retrieval of the security question for password reset.
+        Retrieves the security question for password reset.
         """
         if not login_name:
             messagebox.showerror("Error", "Login name is required.")
@@ -79,42 +78,32 @@ class AppLogic:
         # Fetch the security question from Redis
         security_question = self.redis_client.hget(login_name, 'security_question')
         if security_question:
-            return security_question  # No need to decode; it's already a string
+            return security_question  # Already a string, no decoding needed
         else:
             messagebox.showerror("Error", "Account does not exist or security question not set up.")
             return None
 
-
-    def reset_password(self, login_name, security_answer, new_password, confirm_password):
+    def verify_security_answer(self, login_name, user_answer):
         """
-        Handles the actual password reset process.
+        Verifies the user's answer to the security question.
         """
-        if not all([login_name, security_answer, new_password, confirm_password]):
-            messagebox.showerror("Error", "All fields are required.")
-            return False
-
-        if new_password != confirm_password:
-            messagebox.showerror("Error", "Passwords do not match.")
-            return False
-
-        if self.account_manager.forgot_password(login_name, security_answer, new_password, confirm_password):
-            messagebox.showinfo("Success", "Password updated successfully.")
+        stored_answer = self.redis_client.hget(login_name, 'security_answer')
+        if stored_answer and stored_answer == user_answer:
             return True
         else:
-            messagebox.showerror("Error", "Failed to reset password. Please check your security answer and try again.")
+            messagebox.showerror("Error", "Incorrect security answer.")
             return False
 
-    def handle_forgot_password(self, login_name):
+    def reset_password(self, login_name, new_password):
         """
-        Handles the entire forgot password flow from fetching the security question to resetting the password.
+        Resets the user's password.
         """
-        security_question = self.forgot_password(login_name)
-        if security_question:
-            return security_question
-        return None
-
-    def handle_reset_password(self, login_name, security_answer, new_password, confirm_password):
-        """
-        Completes the password reset process.
-        """
-        return self.reset_password(login_name, security_answer, new_password, confirm_password)
+        try:
+            # Hash the new password and update it in Redis
+            hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+            self.redis_client.hset(login_name, mapping={'password': hashed_password.decode('utf-8')})
+            messagebox.showinfo("Success", "Password updated successfully.")
+            return True
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to reset password: {e}")
+            return False

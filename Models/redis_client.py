@@ -1,4 +1,5 @@
 import redis
+from Utils.error_handler import handle_redis_errors
 
 class RedisClient:
     def __init__(self, host, port, password, ssl=False):
@@ -27,87 +28,25 @@ class RedisClient:
             print(f"Failed to connect to Redis: {e}")
             self.client = None
 
+    @handle_redis_errors
     def exists(self, key):
-        """
-        Checks if a key exists in Redis.
+        return self.client.exists(key) > 0
 
-        Args:
-            key (str): The key to check.
-
-        Returns:
-            bool: True if the key exists, False otherwise.
-        """
-        try:
-            return self.client.exists(key) > 0 if self.client else False
-        except redis.ConnectionError as e:
-            print(f"Error checking key existence: {e}")
-            return False
-
+    @handle_redis_errors
     def hgetall(self, key):
-        """
-        Retrieves all fields and values of a hash stored at key.
+        return self.client.hgetall(key)
 
-        Args:
-            key (str): The key of the hash.
-
-        Returns:
-            dict: A dictionary of fields and values.
-        """
-        try:
-            return self.client.hgetall(key) if self.client else {}
-        except redis.ConnectionError as e:
-            print(f"Error retrieving data: {e}")
-            return {}
-
+    @handle_redis_errors
     def hget(self, key, field):
-        """
-        Retrieves the value of a specific field from a hash stored at key.
+        return self.client.hget(key, field)
 
-        Args:
-            key (str): The key of the hash.
-            field (str): The field to retrieve.
-
-        Returns:
-            str: The value of the field, or None if the field does not exist.
-        """
-        try:
-            return self.client.hget(key, field) if self.client else None
-        except redis.ConnectionError as e:
-            print(f"Error retrieving field data: {e}")
-            return None
-
+    @handle_redis_errors
     def hset(self, key, mapping):
-        """
-        Sets multiple fields in a hash.
+        return self.client.hset(key, mapping=mapping)
 
-        Args:
-            key (str): The key of the hash.
-            mapping (dict): The fields and values to set.
-
-        Returns:
-            int: The number of fields that were added.
-        """
-        try:
-            return self.client.hset(key, mapping=mapping) if self.client else 0
-        except redis.ConnectionError as e:
-            print(f"Error setting data: {e}")
-            return 0
-
+    @handle_redis_errors
     def delete(self, key):
-        """
-        Deletes a key from Redis.
-
-        Args:
-            key (str): The key to delete.
-
-        Returns:
-            int: The number of keys that were removed.
-        """
-        try:
-            return self.client.delete(key) if self.client else 0
-        except redis.ConnectionError as e:
-            print(f"Error deleting key: {e}")
-            return 0
+        return self.client.delete(key)
 
     def keys(self, pattern="*"):
         """
