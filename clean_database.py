@@ -1,6 +1,6 @@
 # clean_database.py
 
-from ..Models.redis_client import RedisClient
+from Models.redis_client import RedisClient
 
 
 def clean_redis_database():
