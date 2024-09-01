@@ -103,7 +103,7 @@ class Account:
             confirm_password (str): Confirmation of the new password.
 
         Returns:
-            bool: True if password reset is successful, False otherwise.
+            bool: True if password reset is successful, otherwise False.
         """
         if self.redis_client.exists(login_name):
             # Retrieve the security question and answer from Redis
@@ -134,5 +134,6 @@ class Account:
                 print("Incorrect security answer.")
                 return False
         else:
-            print("Account does not exist.")
+            print("Account does not exist.") 
             return False
+
