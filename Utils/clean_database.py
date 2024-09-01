@@ -1,6 +1,7 @@
 # clean_database.py
 
-from Models.redis_client import RedisClient
+from ..Models.redis_client import RedisClient
+
 
 def clean_redis_database():
     """
@@ -15,7 +16,7 @@ def clean_redis_database():
             ssl=True
         ).client
         
-        # Get all keys in the Redis database
+        # Retrieve all keys in the Redis database
         keys = redis_client.keys('*')
         if not keys:
             print("The Redis database is already clean.")

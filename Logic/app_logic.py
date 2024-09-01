@@ -5,9 +5,16 @@ from Utils.data_loader import DataLoader
 from GUI.gui_helpers import show_popup  # Ensure correct import of the show_popup function
 
 class AppLogic:
+    """
+    Main application logic handling account management and data operations.
+    """
+
     def __init__(self):
-        # Initialize Redis Client and Account Manager
+        """
+        Initializes the application logic by setting up the Redis client and account manager.
+        """
         try:
+            # Initialize Redis client and account manager
             self.redis_client = RedisClient(
                 host='mycampsiteredis.redis.cache.windows.net',
                 port=6380,
@@ -16,7 +23,7 @@ class AppLogic:
             ).client
             self.account_manager = Account(self.redis_client)
 
-            # Load initial data from CSV (optional)
+            # Optional: Load initial data from a CSV file
             self.load_initial_data()
 
         except Exception as e:
@@ -24,7 +31,7 @@ class AppLogic:
 
     def load_initial_data(self):
         """
-        Loads initial data into Redis from a CSV file for testing.
+        Loads initial test data into Redis from a CSV file for testing purposes.
         """
         try:
             data_loader = DataLoader(self.redis_client)
@@ -37,13 +44,23 @@ class AppLogic:
 
     def create_account(self, login_name, password, first_name, security_question, security_answer):
         """
-        Handles account creation logic.
+        Handles the creation of a new account.
+
+        Args:
+            login_name (str): The user's login name or email.
+            password (str): The user's password.
+            first_name (str): The user's first name.
+            security_question (str): The custom security question.
+            security_answer (str): The answer to the security question.
+
+        Returns:
+            tuple: (bool, str) - Success status and message.
         """
         if not all([login_name, password, first_name, security_question, security_answer]):
             return False, "All fields are required."
 
         try:
-            # Check if account already exists
+            # Check if the account already exists
             if self.redis_client.hexists(login_name, 'password'):
                 return False, "Account already exists."
 
@@ -56,7 +73,14 @@ class AppLogic:
 
     def login(self, login_name, password):
         """
-        Handles login logic.
+        Handles user login by validating credentials.
+
+        Args:
+            login_name (str): The user's login name or email.
+            password (str): The user's password.
+
+        Returns:
+            tuple: (bool, str) - Success status and message.
         """
         if not login_name or not password:
             return False, "Login name and password required."
@@ -69,6 +93,12 @@ class AppLogic:
     def handle_forgot_password(self, login_name):
         """
         Retrieves the security question for password reset.
+
+        Args:
+            login_name (str): The user's login name or email.
+
+        Returns:
+            tuple: (str, str) - The security question and error message if applicable.
         """
         if not login_name:
             return None, "Login name is required."
@@ -82,7 +112,14 @@ class AppLogic:
 
     def verify_security_answer(self, login_name, user_answer):
         """
-        Verifies the user's answer to the security question.
+        Verifies the user's answer to the stored security question.
+
+        Args:
+            login_name (str): The user's login name or email.
+            user_answer (str): The answer provided by the user.
+
+        Returns:
+            bool: True if the answer is correct, False otherwise.
         """
         stored_answer = self.redis_client.hget(login_name, 'security_answer')
         if stored_answer and stored_answer == user_answer:
@@ -94,6 +131,13 @@ class AppLogic:
     def reset_password(self, login_name, new_password):
         """
         Resets the user's password.
+
+        Args:
+            login_name (str): The user's login name or email.
+            new_password (str): The new password provided by the user.
+
+        Returns:
+            tuple: (bool, str) - Success status and message.
         """
         try:
             # Hash the new password and update it in Redis

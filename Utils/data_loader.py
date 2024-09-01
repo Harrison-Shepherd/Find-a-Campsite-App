@@ -20,7 +20,6 @@ class DataLoader:
             csv_file (str): Path to the CSV file containing initial data.
         """
         try:
-            # Open the CSV file
             with open(csv_file, mode='r') as file:
                 reader = csv.DictReader(file)
                 expected_headers = ['username', 'password', 'firstname', 'first dogs name']
@@ -30,14 +29,13 @@ class DataLoader:
                     raise ValueError("CSV headers do not match the expected schema.")
 
                 for row in reader:
-                    username = row.get('username')  # Column A
-                    password = row.get('password')  # Column B
-                    firstname = row.get('firstname')  # Column C
-                    first_dogs_name = row.get('first dogs name')  # Column D
+                    username = row.get('username')
+                    password = row.get('password')
+                    firstname = row.get('firstname')
+                    first_dogs_name = row.get('first dogs name')
 
-                    # Ensure all required fields are present
+                    # Ensure all required fields are present before saving to Redis
                     if username and password and firstname and first_dogs_name:
-                        # Save the data into Redis with username as the key
                         self.redis_client.hset(username, mapping={
                             'password': password,
                             'first_name': firstname,
@@ -79,6 +77,7 @@ class DataLoader:
                         firstname = row.get('firstname')
                         first_dogs_name = row.get('first dogs name')
 
+                        # Save valid rows to Redis
                         if username and password and firstname and first_dogs_name:
                             self.redis_client.hset(username, mapping={
                                 'password': password,
