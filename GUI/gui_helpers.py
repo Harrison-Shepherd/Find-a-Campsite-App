@@ -1,57 +1,71 @@
-# GUI/gui_helpers.py
-
 from kivy.uix.button import Button
-from kivy.uix.popup import Popup
 from kivy.uix.label import Label
+from kivy.uix.popup import Popup
+from kivy.uix.image import Image
 from kivy.uix.boxlayout import BoxLayout
-import os
 
-# Default button image path (ensure this path points to a valid image)
-DEFAULT_BUTTON_IMAGE = "Assets/default_button.png"
 
-def create_button(text, size_hint, pos_hint, on_press, background_normal=None):
+def create_button(text, size_hint, pos_hint, callback, image_path=None):
     """
-    Helper function to create a button with specified properties.
-
-    Args:
-        text (str): Text displayed on the button.
-        size_hint (tuple): Size hint of the button.
-        pos_hint (dict): Position hint of the button.
-        on_press (function): Function to call on button press.
-        background_normal (str, optional): Path to the button's background image.
-
-    Returns:
-        Button: A configured Kivy Button instance.
+    Create a button with optional image and set styles.
+    :param text: Button text
+    :param size_hint: Size hint tuple (width, height)
+    :param pos_hint: Position hint dict
+    :param callback: Function to be called on button press
+    :param image_path: Optional path to an image file
+    :return: Configured Button object
     """
-    # Use the default image if the provided path is None or does not exist
-    if not background_normal or not os.path.exists(background_normal):
-        background_normal = ""
-
-    # Create the button with a fallback color if no image is used
-    return Button(
+    button = Button(
         text=text,
         size_hint=size_hint,
         pos_hint=pos_hint,
-        on_press=on_press,
-        background_normal=background_normal,
-        background_down=background_normal,
-        border=(0, 0, 0, 0),
-        background_color=(0.3, 0.6, 0.9, 1) if not background_normal else (1, 1, 1, 1)  # Default color if no image
+        font_size=20,  # Set an appropriate font size
+        background_normal=image_path if image_path else '',  # Set image if provided
+        background_down=image_path if image_path else '',  # Set down image if provided
+        background_color=(0.2, 0.6, 0.8, 1) if not image_path else (1, 1, 1, 1),  # Default color if no image
+        color=(1, 1, 1, 1),  # Text color
+        border=(0, 0, 0, 0)  # Set border to zero for proper rendering
     )
+    button.bind(on_press=callback)
+    return button
 
 
 def show_popup(title, message):
-    """Display a popup with the specified title and message."""
-    # If message is empty, provide a default fallback
-    if not message:
-        message = "An unexpected error occurred. Please try again."
+    """
+    Display a popup with a given title and message.
+    :param title: Title of the popup
+    :param message: Message to display in the popup
+    """
+    layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
+    label = Label(text=message, halign='center', valign='middle', size_hint=(1, 0.8))
+    close_button = Button(text='OK', size_hint=(1, 0.2))
 
-    content = BoxLayout(orientation='vertical', padding=10, spacing=10)
-    content.add_widget(Label(text=message))
+    layout.add_widget(label)
+    layout.add_widget(close_button)
 
-    button = Button(text="OK", size_hint=(1, 0.25))
-    content.add_widget(button)
+    popup = Popup(
+        title=title,
+        content=layout,
+        size_hint=(0.6, 0.4),
+        auto_dismiss=False
+    )
 
-    popup = Popup(title=title, content=content, size_hint=(0.6, 0.4))
-    button.bind(on_press=popup.dismiss)
+    close_button.bind(on_press=popup.dismiss)
     popup.open()
+
+
+def create_label(text, font_size=24, color=(1, 1, 1, 1)):
+    """
+    Create a styled label with specified text, font size, and color.
+    :param text: Text to display in the label
+    :param font_size: Size of the font
+    :param color: Color of the text
+    :return: Configured Label object
+    """
+    return Label(
+        text=text,
+        font_size=font_size,
+        color=color,
+        halign='center',
+        valign='middle'
+    )
