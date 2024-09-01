@@ -27,10 +27,36 @@ class ForgotPasswordScreen(Screen):
         self.form_layout.add_widget(self.title_label)
 
         # Input fields
-        self.login_input = TextInput(hint_text="Enter login name (email)", multiline=False, write_tab=False, size_hint=(1, 0.1), font_size=20)
-        self.security_answer_input = TextInput(hint_text="Enter your security answer", multiline=False, write_tab=False, size_hint=(1, 0.1), font_size=20)
-        self.new_password_input = TextInput(hint_text="Enter your new password", password=True, multiline=False, write_tab=False, size_hint=(1, 0.1), font_size=20)
-        self.confirm_password_input = TextInput(hint_text="Confirm your new password", password=True, multiline=False, write_tab=False, size_hint=(1, 0.1), font_size=20)
+        self.login_input = TextInput(
+            hint_text="Enter login name (email)",
+            multiline=False,
+            write_tab=False,
+            size_hint=(1, 0.1),
+            font_size=20
+        )
+        self.security_answer_input = TextInput(
+            hint_text="Enter your security answer",
+            multiline=False,
+            write_tab=False,
+            size_hint=(1, 0.1),
+            font_size=20
+        )
+        self.new_password_input = TextInput(
+            hint_text="Enter your new password",
+            password=True,
+            multiline=False,
+            write_tab=False,
+            size_hint=(1, 0.1),
+            font_size=20
+        )
+        self.confirm_password_input = TextInput(
+            hint_text="Confirm your new password",
+            password=True,
+            multiline=False,
+            write_tab=False,
+            size_hint=(1, 0.1),
+            font_size=20
+        )
 
         # Add the email input field initially
         self.form_layout.add_widget(self.login_input)
@@ -46,18 +72,6 @@ class ForgotPasswordScreen(Screen):
         layout.add_widget(create_button("", (0.1, 0.05), {'x': 0.93, 'y': 0.93}, self.go_to_info, "Assets/help_icon.png"))
 
         self.add_widget(layout)
-
-    def clear_inputs(self):
-        """Clear all input fields."""
-        self.login_input.text = ""
-        self.security_answer_input.text = ""
-        self.new_password_input.text = ""
-        self.confirm_password_input.text = ""
-
-    def remove_widget_from_parent(self, widget):
-        """Remove a widget from its parent if it has one."""
-        if widget.parent:
-            widget.parent.remove_widget(widget)
 
     def handle_submit(self, instance):
         if self.stage == 1:
@@ -123,6 +137,18 @@ class ForgotPasswordScreen(Screen):
         self.form_layout.add_widget(self.submit_button)
         self.form_layout.add_widget(self.back_button)
         self.manager.current = 'main'
+
+    def clear_inputs(self):
+        """Clear all input fields."""
+        self.login_input.text = ""
+        self.security_answer_input.text = ""
+        self.new_password_input.text = ""
+        self.confirm_password_input.text = ""
+
+    def remove_widget_from_parent(self, widget):
+        """Safely remove a widget from its parent."""
+        if widget.parent:
+            widget.parent.remove_widget(widget)
 
     def exit_app(self, instance):
         App.get_running_app().stop()

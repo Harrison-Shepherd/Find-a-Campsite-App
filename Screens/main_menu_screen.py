@@ -26,7 +26,7 @@ class MainMenuScreen(Screen):
 
         # Add exit and help buttons
         layout.add_widget(create_button("Exit", (0.05, 0.05), {'x': 0.01, 'y': 0.93}, self.exit_app))
-        layout.add_widget(create_button("", (0.05, 0.05), {'x': 0.93, 'y': 0.93}, self.go_to_info, "Assets/help_icon.png"))
+        layout.add_widget(create_button("", (0.07, 0.07), {'x': 0.93, 'y': 0.93}, self.go_to_info, "Assets/help_icon.png"))
 
         self.add_widget(layout)
 

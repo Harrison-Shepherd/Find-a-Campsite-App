@@ -10,6 +10,8 @@ from Screens.login_screen import LoginScreen
 from Screens.forgot_password_screen import ForgotPasswordScreen
 from Screens.info_screen import InfoScreen
 
+
+Window.title = "Find a Campsite App"
 # Set the window size (adjust these dimensions as needed to fit your screen)
 Window.size = (1280, 720)  # Example size, modify as per your screen resolution
 
@@ -24,6 +26,7 @@ class CampsiteApp(App):
     def build(self):
         # Initialize application logic
         self.logic = AppLogic()
+
 
         # Create the screen manager with NoTransition to disable animations
         self.screen_manager = ScreenManager(transition=NoTransition())  # Disable transitions
