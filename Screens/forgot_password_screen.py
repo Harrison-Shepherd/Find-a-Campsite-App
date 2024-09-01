@@ -8,8 +8,6 @@ from kivy.app import App
 from GUI.gui_helpers import create_button, show_popup
 from GUI.gui_helpers import create_exit_button, create_help_button
 
-
-
 class ForgotPasswordScreen(Screen):
     """Screen for handling the password reset process."""
 
@@ -77,7 +75,6 @@ class ForgotPasswordScreen(Screen):
 
         # Add the form layout and other buttons to the screen
         layout.add_widget(self.form_layout)
-        # Inside the screen class, replace the button creation with the standardized functions
         layout.add_widget(create_exit_button(self.exit_app))
         layout.add_widget(create_help_button(self.go_to_info))
 
@@ -93,6 +90,10 @@ class ForgotPasswordScreen(Screen):
             if error_message:
                 show_popup("Error", error_message)
             else:
+                # Check if the security question exists; if not, use the default question
+                if not security_question:
+                    security_question = "What is the name of your first pet?"
+                    
                 # Move to Stage 2: Display security question
                 self.stage = 2
                 self.title_label.text = security_question

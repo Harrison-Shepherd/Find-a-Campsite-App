@@ -1,6 +1,5 @@
-# utils/data_loader.py
-
 import csv
+import bcrypt
 
 class DataLoader:
     def __init__(self, redis_client):
@@ -29,18 +28,25 @@ class DataLoader:
                     raise ValueError("CSV headers do not match the expected schema.")
 
                 for row in reader:
-                    username = row.get('username')
-                    password = row.get('password')
-                    firstname = row.get('firstname')
-                    first_dogs_name = row.get('first dogs name')
+                    username = row.get('username').strip()
+                    password = row.get('password').strip()
+                    firstname = row.get('firstname').strip()
+                    first_dogs_name = row.get('first dogs name').strip()
 
                     # Ensure all required fields are present before saving to Redis
                     if username and password and firstname and first_dogs_name:
-                        self.redis_client.hset(username, mapping={
-                            'password': password,
+                        # Encrypt the password before storing it in Redis
+                        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
+                        # Prepare the mapping dictionary without the security question
+                        data_mapping = {
+                            'password': hashed_password.decode('utf-8'),
                             'first_name': firstname,
                             'security_answer': first_dogs_name
-                        })
+                        }
+
+                        # Store the account details in Redis
+                        self.redis_client.hset(username, mapping=data_mapping)
                     else:
                         print(f"Skipping row with missing data: {row}")
 
@@ -72,15 +78,16 @@ class DataLoader:
                 reader = csv.DictReader(file)
                 for row in reader:
                     try:
-                        username = row.get('username')
-                        password = row.get('password')
-                        firstname = row.get('firstname')
-                        first_dogs_name = row.get('first dogs name')
+                        username = row.get('username').strip()
+                        password = row.get('password').strip()
+                        firstname = row.get('firstname').strip()
+                        first_dogs_name = row.get('first dogs name').strip()
 
-                        # Save valid rows to Redis
+                        # Encrypt the password and save valid rows to Redis
                         if username and password and firstname and first_dogs_name:
+                            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
                             self.redis_client.hset(username, mapping={
-                                'password': password,
+                                'password': hashed_password.decode('utf-8'),
                                 'first_name': firstname,
                                 'security_answer': first_dogs_name
                             })

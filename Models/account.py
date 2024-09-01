@@ -67,21 +67,16 @@ class Account:
         return bool(re.match(r"[^@]+@[^@]+\.[^@]+", email))
 
     def login(self, login_name, password):
-        """
-        Validates the user's login credentials against the stored data in Redis.
+        # Trim spaces from user input
+        login_name = login_name.strip()
+        password = password.strip()
         
-        Args:
-            login_name (str): The user's login name or email.
-            password (str): The user's password.
-            
-        Returns:
-            bool: True if login is successful, False otherwise.
-        """
+        print(f"Attempting to log in with: '{login_name}'")
         if self.redis_client.exists(login_name):
-            # Retrieve the stored hashed password from Redis.
+            print(f"Found account for: '{login_name}'")
             stored_password = self.redis_client.hget(login_name, 'password').encode('utf-8')
             
-            # Verify the provided password against the stored hash using bcrypt.
+            # Verify the provided password against the stored hash using bcrypt
             if bcrypt.checkpw(password.encode('utf-8'), stored_password):
                 print("Login successful!")
                 return True
@@ -89,8 +84,9 @@ class Account:
                 print("Incorrect password.")
                 return False
         else:
-            print("Account does not exist.")
+            print(f"Account for '{login_name}' does not exist.")
             return False
+
 
     def forgot_password(self, login_name, user_answer, new_password, confirm_password):
         """

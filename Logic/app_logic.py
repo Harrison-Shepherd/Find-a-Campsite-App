@@ -98,15 +98,24 @@ class AppLogic:
             login_name (str): The user's login name or email.
 
         Returns:
-            tuple: (str, str) - The security question and error message if applicable.
+            tuple: (str, str) - The security question and an error message if applicable.
         """
         if not login_name:
             return None, "Login name is required."
 
         # Fetch the security question from Redis
         security_question = self.redis_client.hget(login_name, 'security_question')
+        security_answer = self.redis_client.hget(login_name, 'security_answer')
+
+        if not self.redis_client.exists(login_name):
+            return None, "Account does not exist."
+
+        # Check if the security question exists; if not, provide a default question
+        if not security_question and security_answer:
+            security_question = "What is the name of your first pet?"  # Default question if not set
+
         if security_question:
-            return security_question, None  # Return the question and no error message
+            return security_question, None
         else:
             return None, "Account does not exist or security question not set up."
 
@@ -121,8 +130,11 @@ class AppLogic:
         Returns:
             bool: True if the answer is correct, False otherwise.
         """
+        login_name = login_name.strip()
+        user_answer = user_answer.strip()
+        
         stored_answer = self.redis_client.hget(login_name, 'security_answer')
-        if stored_answer and stored_answer == user_answer:
+        if stored_answer and stored_answer.strip() == user_answer:
             return True
         else:
             show_popup("Error", "Incorrect security answer.")
