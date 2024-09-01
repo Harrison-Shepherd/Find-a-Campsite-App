@@ -114,13 +114,11 @@ class CreateAccountScreen(Screen):
         first_name = self.first_name_input.text
         security_question = self.security_question_input.text
         security_answer = self.security_answer_input.text
-        success = self.logic.create_account(login_name, password, first_name, security_question, security_answer)
+        
+        success, message = self.logic.create_account(login_name, password, first_name, security_question, security_answer)
 
-        # Show result popup
-        if success:
-            show_popup("Success", "Account created successfully.")
-        else:
-            show_popup("Error", "Failed to create account.")
+        # Show the appropriate popup based on success or failure
+        show_popup("Success" if success else "Error", message)
 
     def go_back_to_main(self, instance):
         self.clear_inputs()  # Clear inputs when returning to the main menu
@@ -172,15 +170,15 @@ class LoginScreen(Screen):
         self.login_input.text = ""
         self.password_input.text = ""
 
+    # LoginScreen class
+
     def handle_login(self, instance):
         # Collect data and call the login logic
         login_name = self.login_input.text
         password = self.password_input.text
-        success = self.logic.login(login_name, password)
-        if success:
-            show_popup("Success", "Login successful!")
-        else:
-            show_popup("Error", "Incorrect login credentials.")
+        success, message = self.logic.login(login_name, password)  # Expecting a tuple return (success, message)
+        show_popup("Success" if success else "Error", message)  # Show popup only once based on the message
+
 
     def go_back_to_main(self, instance):
         self.clear_inputs()  # Clear inputs when returning to the main menu
@@ -248,19 +246,19 @@ class ForgotPasswordScreen(Screen):
         if self.stage == 1:
             # Step 1: Check email and fetch security question
             login_name = self.login_input.text
-            self.security_question = self.logic.handle_forgot_password(login_name)
+            security_question, error_message = self.logic.handle_forgot_password(login_name)
 
-            if self.security_question:
+            if error_message:
+                show_popup("Error", error_message)
+            else:
                 # Move to Stage 2: Display security question and ask for the answer
                 self.stage = 2
-                self.title_label.text = self.security_question
+                self.title_label.text = security_question
                 self.remove_widget_from_parent(self.login_input)
                 self.form_layout.clear_widgets([self.submit_button, self.back_button])
                 self.form_layout.add_widget(self.security_answer_input)
                 self.form_layout.add_widget(self.submit_button)
                 self.form_layout.add_widget(self.back_button)
-            else:
-                show_popup("Error", "Account does not exist or security question not set up.")
 
         elif self.stage == 2:
             # Step 2: Validate the security answer
@@ -286,11 +284,10 @@ class ForgotPasswordScreen(Screen):
                 show_popup("Error", "Passwords do not match.")
                 return
 
-            if self.logic.reset_password(self.login_input.text, new_password):
-                show_popup("Success", "Password updated successfully.")
+            success, message = self.logic.reset_password(self.login_input.text, new_password)
+            show_popup("Success" if success else "Error", message)
+            if success:
                 self.go_back_to_main(None)
-            else:
-                show_popup("Error", "Failed to reset password. Please try again.")
 
     def go_back_to_main(self, instance):
         self.clear_inputs()  # Clear inputs when returning to the main menu
@@ -315,8 +312,6 @@ class ForgotPasswordScreen(Screen):
 
     def go_to_info(self, instance):
         self.manager.current = 'info'
-
-
 
 
 class InfoScreen(Screen):

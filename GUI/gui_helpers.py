@@ -41,20 +41,17 @@ def create_button(text, size_hint, pos_hint, on_press, background_normal=None):
 
 
 def show_popup(title, message):
-    """
-    Helper function to display a popup with a message.
+    """Display a popup with the specified title and message."""
+    # If message is empty, provide a default fallback
+    if not message:
+        message = "An unexpected error occurred. Please try again."
 
-    Args:
-        title (str): The title of the popup.
-        message (str): The message displayed inside the popup.
+    content = BoxLayout(orientation='vertical', padding=10, spacing=10)
+    content.add_widget(Label(text=message))
 
-    Returns:
-        Popup: A configured Kivy Popup instance.
-    """
-    content = BoxLayout(orientation='vertical')
-    content.add_widget(Label(text=message, size_hint_y=None, height=50))
-    button = Button(text='OK', size_hint_y=None, height=50)
+    button = Button(text="OK", size_hint=(1, 0.25))
     content.add_widget(button)
-    popup = Popup(title=title, content=content, size_hint=(0.5, 0.3))
+
+    popup = Popup(title=title, content=content, size_hint=(0.6, 0.4))
     button.bind(on_press=popup.dismiss)
     popup.open()

@@ -1,9 +1,8 @@
-import bcrypt  # Add this import for bcrypt
-from tkinter import messagebox
+import bcrypt
 from Models.redis_client import RedisClient
 from Models.account import Account
 from Utils.data_loader import DataLoader
-
+from GUI.gui_helpers import show_popup  # Ensure correct import of the show_popup function
 
 class AppLogic:
     def __init__(self):
@@ -21,7 +20,7 @@ class AppLogic:
             self.load_initial_data()
 
         except Exception as e:
-            messagebox.showerror("Connection Error", f"Failed to connect to Redis: {e}")
+            show_popup("Connection Error", f"Failed to connect to Redis: {e}")
 
     def load_initial_data(self):
         """
@@ -41,47 +40,45 @@ class AppLogic:
         Handles account creation logic.
         """
         if not all([login_name, password, first_name, security_question, security_answer]):
-            messagebox.showerror("Error", "All fields are required.")
-            return False
+            return False, "All fields are required."
 
         try:
+            # Check if account already exists
+            if self.redis_client.hexists(login_name, 'password'):
+                return False, "Account already exists."
+
+            # Proceed with account creation
             self.account_manager.create_account(login_name, password, first_name, security_question, security_answer)
-            messagebox.showinfo("Success", "Account created successfully.")
-            return True
+            return True, "Account created successfully."
+
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to create account: {e}")
-            return False
+            return False, f"Failed to create account: {str(e)}"
 
     def login(self, login_name, password):
         """
         Handles login logic.
         """
         if not login_name or not password:
-            messagebox.showerror("Error", "Login name and password are required.")
-            return False
+            return False, "Login name and password required."
 
         if self.account_manager.login(login_name, password):
-            messagebox.showinfo("Login", "Login successful!")
-            return True
+            return True, "Login successful!"
         else:
-            messagebox.showerror("Login Failed", "Incorrect login credentials.")
-            return False
+            return False, "Incorrect login credentials."
 
     def handle_forgot_password(self, login_name):
         """
         Retrieves the security question for password reset.
         """
         if not login_name:
-            messagebox.showerror("Error", "Login name is required.")
-            return None
+            return None, "Login name is required."
 
         # Fetch the security question from Redis
         security_question = self.redis_client.hget(login_name, 'security_question')
         if security_question:
-            return security_question  # Already a string, no decoding needed
+            return security_question, None  # Return the question and no error message
         else:
-            messagebox.showerror("Error", "Account does not exist or security question not set up.")
-            return None
+            return None, "Account does not exist or security question not set up."
 
     def verify_security_answer(self, login_name, user_answer):
         """
@@ -91,7 +88,7 @@ class AppLogic:
         if stored_answer and stored_answer == user_answer:
             return True
         else:
-            messagebox.showerror("Error", "Incorrect security answer.")
+            show_popup("Error", "Incorrect security answer.")
             return False
 
     def reset_password(self, login_name, new_password):
@@ -102,8 +99,6 @@ class AppLogic:
             # Hash the new password and update it in Redis
             hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
             self.redis_client.hset(login_name, mapping={'password': hashed_password.decode('utf-8')})
-            messagebox.showinfo("Success", "Password updated successfully.")
-            return True
+            return True, "Password updated successfully."
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to reset password: {e}")
-            return False
+            return False, f"Failed to reset password: {e}"
