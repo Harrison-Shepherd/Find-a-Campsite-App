@@ -4,13 +4,11 @@ from kivy.uix.label import Label
 from kivy.uix.image import Image
 from kivy.app import App
 from kivy.uix.button import Button
-
+from kivy.uix.boxlayout import BoxLayout
+from kivy.graphics import Color, Rectangle
 
 class InfoScreen(Screen):
-    """
-    Screen displaying application information and usage instructions.
-    Provides guidance on how to create an account, log in, and reset a forgotten password.
-    """
+    """Screen displaying app information."""
 
     def __init__(self, **kwargs):
         super(InfoScreen, self).__init__(**kwargs)
@@ -20,7 +18,18 @@ class InfoScreen(Screen):
         self.background = Image(source="Assets/background.jpg", allow_stretch=True)
         layout.add_widget(self.background)
 
-        # Information text displayed in the center of the screen
+        # BoxLayout for the text with a semi-transparent background
+        text_box = BoxLayout(orientation='vertical', size_hint=(0.8, 0.5), pos_hint={'center_x': 0.5, 'center_y': 0.5})
+
+        # Add a semi-transparent grey background behind the text
+        with text_box.canvas.before:
+            Color(0.2, 0.2, 0.2, 0.6)  # RGBA: Grey color with 60% opacity
+            self.rect = Rectangle(size=text_box.size, pos=text_box.pos)
+
+        # Bind the background size and position to the box layout
+        text_box.bind(size=self._update_rect, pos=self._update_rect)
+
+        # Add text information to the box
         info_text = (
             "Welcome to the Find a Campsite App!\n\n"
             "How to use the system:\n"
@@ -32,12 +41,15 @@ class InfoScreen(Screen):
             text=info_text,
             halign='center',
             valign='middle',
-            size_hint=(0.8, 0.8),
-            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+            size_hint=(1, 1),
+            color=(1, 1, 1, 1)  # Text color
         )
-        layout.add_widget(info_label)
+        text_box.add_widget(info_label)
 
-        # Back button to return to the main menu
+        # Add text box to the layout
+        layout.add_widget(text_box)
+
+        # Add the back button
         back_button = Button(
             text="Back to Main Menu",
             size_hint=(0.2, 0.1),
@@ -48,8 +60,10 @@ class InfoScreen(Screen):
 
         self.add_widget(layout)
 
+    def _update_rect(self, instance, value):
+        """Update the background rectangle size and position."""
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
+
     def go_back_to_main(self, instance):
-        """
-        Navigates back to the main menu screen.
-        """
         self.manager.current = 'main'
