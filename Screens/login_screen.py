@@ -12,7 +12,7 @@ from GUI.gui_helpers import create_exit_button, create_help_button
 class LoginScreen(Screen):
     """
     Screen for user login.
-    This screen allows the user to enter their login credentials and navigate to other sections of the app.
+    Allows users to enter their credentials and access the app. Also provides navigation to other sections.
     """
 
     def __init__(self, logic, **kwargs):
@@ -24,7 +24,7 @@ class LoginScreen(Screen):
         self.background = Image(source="Assets/background.jpg", allow_stretch=True, keep_ratio=False)
         layout.add_widget(self.background)
 
-        # Form layout for login inputs and buttons
+        # Create form layout for login inputs and buttons
         form_layout = BoxLayout(
             orientation='vertical',
             padding=20,
@@ -34,7 +34,7 @@ class LoginScreen(Screen):
         )
         form_layout.add_widget(Label(text="Login", font_size=28, size_hint=(1, 0.1)))
 
-        # Input fields for login
+        # Create input fields for login
         self.login_input = TextInput(
             hint_text="Enter login name (email)",
             multiline=False,
@@ -58,7 +58,7 @@ class LoginScreen(Screen):
         form_layout.add_widget(create_button("Back to Main Menu", (1, 0.1), {}, self.go_back_to_main))
 
         layout.add_widget(form_layout)
-        # Inside the screen class, replace the button creation with the standardized functions
+        # Add standardized exit and help buttons
         layout.add_widget(create_exit_button(self.exit_app))
         layout.add_widget(create_help_button(self.go_to_info))
 
@@ -66,7 +66,7 @@ class LoginScreen(Screen):
 
     def handle_login(self, instance):
         """
-        Handles the login process by collecting input data and calling the login logic.
+        Process the login attempt using the provided credentials.
         """
         login_name = self.login_input.text
         password = self.password_input.text
@@ -75,20 +75,20 @@ class LoginScreen(Screen):
 
     def go_back_to_main(self, instance):
         """
-        Clears input fields and navigates back to the main menu screen.
+        Clear input fields and return to the main menu screen.
         """
         self.clear_inputs()
         self.manager.current = 'main'
 
     def clear_inputs(self):
-        """Clear all input fields."""
+        """Reset all input fields to empty."""
         self.login_input.text = ""
         self.password_input.text = ""
 
     def exit_app(self, instance):
-        """Stops the application."""
+        """Terminate the application."""
         App.get_running_app().stop()
 
     def go_to_info(self, instance):
-        """Navigates to the information screen."""
+        """Switch to the information screen."""
         self.manager.current = 'info'

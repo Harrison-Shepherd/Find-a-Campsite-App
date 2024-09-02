@@ -37,21 +37,21 @@ class MainMenuScreen(Screen):
         self.add_widget(layout)
 
     def go_to_create_account(self, instance):
-        # Navigate to the Create Account screen
+        """Navigate to the Create Account screen."""
         self.manager.current = 'create_account'
 
     def go_to_login(self, instance):
-        # Navigate to the Login screen
+        """Navigate to the Login screen."""
         self.manager.current = 'login'
 
     def go_to_forgot_password(self, instance):
-        # Navigate to the Forgot Password screen
+        """Navigate to the Forgot Password screen."""
         self.manager.current = 'forgot_password'
 
     def go_to_info(self, instance):
-        # Navigate to the Info screen
+        """Navigate to the Info screen."""
         self.manager.current = 'info'
 
     def exit_app(self, instance):
-        # Exit the application
+        """Exit the application."""
         App.get_running_app().stop()
