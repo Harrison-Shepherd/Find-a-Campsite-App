@@ -1,5 +1,3 @@
-# clean_database.py
-
 from Models.redis_client import RedisClient
 
 

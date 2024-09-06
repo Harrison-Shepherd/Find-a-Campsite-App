@@ -1,4 +1,3 @@
-# Tests/test_data_loader.py
 import unittest
 from unittest.mock import patch, mock_open
 from Models.redis_client import RedisClient

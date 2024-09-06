@@ -1,5 +1,3 @@
-# utils/error_handler.py
-
 import redis
 
 def handle_redis_errors(func):

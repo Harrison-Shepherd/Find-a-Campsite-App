@@ -1,4 +1,3 @@
-# Tests/test_login.py
 import bcrypt
 import unittest
 from Models.account import Account

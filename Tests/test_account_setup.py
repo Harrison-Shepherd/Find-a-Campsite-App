@@ -1,4 +1,3 @@
-# Tests/test_account_setup.py
 import unittest
 from unittest.mock import patch
 import logging

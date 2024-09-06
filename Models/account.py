@@ -67,24 +67,43 @@ class Account:
         return bool(re.match(r"[^@]+@[^@]+\.[^@]+", email))
 
     def login(self, login_name, password):
-        # Trim spaces from login_name only, not the password
+        """
+        Handles user login by verifying the provided credentials against stored data in Redis.
+
+        Args:
+            login_name (str): The email or username provided by the user for login.
+            password (str): The password provided by the user.
+
+        Returns:
+            bool: True if login is successful, otherwise False.
+        """
+
+        # Trim spaces from the login_name to avoid accidental input errors; do not alter the password.
         login_name = login_name.strip()
         
         print(f"Attempting to log in with: '{login_name}'")
+
+        # Check if an account exists for the provided login name in Redis.
         if self.redis_client.exists(login_name):
             print(f"Found account for: '{login_name}'")
+
+            # Retrieve the stored password hash from Redis and ensure it is in byte format for bcrypt.
             stored_password = self.redis_client.hget(login_name, 'password').encode('utf-8')
             
-            # Verify the provided password against the stored hash using bcrypt
+            # Verify the provided password against the stored hash using bcrypt.
+            # bcrypt.checkpw() returns True if the password matches, otherwise False.
             if bcrypt.checkpw(password.encode('utf-8'), stored_password):
                 print("Login successful!")
                 return True
             else:
+                # If the provided password does not match the stored password, return False.
                 print("Incorrect password.")
                 return False
         else:
+            # If no account is found for the provided login name, notify the user.
             print(f"Account for '{login_name}' does not exist.")
             return False
+
 
 
     def forgot_password(self, login_name, user_answer, new_password, confirm_password):

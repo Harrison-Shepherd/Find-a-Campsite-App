@@ -1,5 +1,3 @@
-# gui_main.py
-
 from kivy.core.window import Window
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, NoTransition
