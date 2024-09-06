@@ -1,3 +1,19 @@
+
+Redis code is stored in a few different places, redis_client.py, account.py, and app_logic.py.
+
+here is the details you need to connect:
+
+Host = 'mycampsiteredis.redis.cache.windows.net'
+Port = 6380
+Password = 'F21P4lrm3B63A5nNWUldt528Usqtped65AzCaNnjtg8='
+SSL = True
+
+Created the Redis database in Azure, and used Redis Insight for testing
+
+
+
+
+
 # Find a Campsite App
 
 ## Overview
