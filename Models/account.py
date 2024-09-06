@@ -67,9 +67,8 @@ class Account:
         return bool(re.match(r"[^@]+@[^@]+\.[^@]+", email))
 
     def login(self, login_name, password):
-        # Trim spaces from user input
+        # Trim spaces from login_name only, not the password
         login_name = login_name.strip()
-        password = password.strip()
         
         print(f"Attempting to log in with: '{login_name}'")
         if self.redis_client.exists(login_name):

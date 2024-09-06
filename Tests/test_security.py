@@ -48,7 +48,7 @@ class TestPasswordReset(unittest.TestCase):
             logging.debug(f"Deleting key: {key}")
             self.redis_client.delete(key)
 
-    @patch('builtins.input', side_effect=lambda prompt: delayed_input(['Percy', 'new_password_123', 'new_password_123']).__next__())
+    @patch('builtins.input', side_effect=['Percy', 'new_password_123', 'new_password_123'])
     def test_password_reset_with_correct_security_answer(self, mock_input):
         """
         Test password reset with the correct security question answer.
@@ -76,7 +76,7 @@ class TestPasswordReset(unittest.TestCase):
         # Assert that the password reset was successful
         self.assertTrue(result)
 
-    @patch('builtins.input', side_effect=lambda prompt: delayed_input(['wronganswer']).__next__())
+    @patch('builtins.input', side_effect=['wronganswer'])
     def test_password_reset_with_incorrect_security_answer(self, mock_input):
         """
         Test password reset with an incorrect security question answer.
@@ -103,6 +103,23 @@ class TestPasswordReset(unittest.TestCase):
 
         # Assert that the password reset was unsuccessful
         self.assertFalse(result)
+
+    def test_reset_password_mismatched_confirmation(self):
+        """Test password reset when new passwords do not match."""
+        self.account_manager.create_account(
+            "testuser@gmail.com",
+            "testpw123",
+            "John",
+            "What is your favorite color?",
+            "Blue"
+        )
+        result = self.account_manager.forgot_password(
+            "testuser@gmail.com",
+            user_answer="Blue",
+            new_password="newpassword123",
+            confirm_password="differentpassword123"
+        )
+        self.assertFalse(result, "Password reset should fail when new passwords do not match.")
 
     def tearDown(self):
         """

@@ -17,7 +17,7 @@ This repository contains the complete Python code required to run the app, inclu
 
 ## Features
 - **Account Management:** Allows users to create accounts with encrypted passwords and custom security questions for password recovery.
-- **Secure Login:** Utilizes bcrypt for secure password verification against stored encrypted hashes.
+- **Secure Login:** Utilises bcrypt for secure password verification against stored encrypted hashes.
 - **Password Recovery:** Provides a password reset feature using custom security questions.
 - **Interactive GUI:** Built with Kivy for a responsive, user-friendly interface.
 - **Data Encryption:** Ensures all sensitive user data is securely encrypted before storage in Redis.

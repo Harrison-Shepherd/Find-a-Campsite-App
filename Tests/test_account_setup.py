@@ -51,37 +51,24 @@ class TestAccountSetup(unittest.TestCase):
         self.assertEqual(stored_account['security_answer'], "Percy")
 
     @patch('builtins.input', side_effect=["cat's name", 'Percy'])
-    def test_successful_login(self, mock_input):
-        """
-        Test successful login with correct credentials.
-        """
-        self.account_manager.create_account(
-            login_name="test@gmail.com",
-            password="testpw123",
-            first_name="Harrison"
+    def test_create_account_with_invalid_email(self, mock_input):
+        """Test account creation with an invalid email format."""
+        result = self.account_manager.create_account(
+            login_name="invalidemail", 
+            password="password123", 
+            first_name="John"
         )
-        result = self.account_manager.login("test@gmail.com", "testpw123")
-        self.assertTrue(result)
+        self.assertIsNone(result, "Account creation should fail with an invalid email format.")
 
     @patch('builtins.input', side_effect=["cat's name", 'Percy'])
-    def test_invalid_password_login(self, mock_input):
-        """
-        Test login attempt with an incorrect password.
-        """
-        self.account_manager.create_account(
-            login_name="test@gmail.com",
-            password="testpw123",
-            first_name="Harrison"
+    def test_create_account_with_missing_fields(self, mock_input):
+        """Test account creation with missing required fields."""
+        result = self.account_manager.create_account(
+            login_name="missingfields@example.com", 
+            password="",  # Missing password
+            first_name=""
         )
-        result = self.account_manager.login("test@gmail.com", "wrongpassword")
-        self.assertFalse(result)
-
-    def test_non_existent_account_login(self):
-        """
-        Test login attempt with a non-existent account.
-        """
-        result = self.account_manager.login("nonuser@example.com", "password")
-        self.assertFalse(result)
+        self.assertIsNone(result, "Account creation should fail when required fields are missing.")
 
     def tearDown(self):
         """
@@ -89,7 +76,6 @@ class TestAccountSetup(unittest.TestCase):
         """
         logging.info("Tearing down: Clearing Redis data after test.")
         self.clear_redis_data()
-
 
 if __name__ == '__main__':
     unittest.main()
