@@ -8,15 +8,15 @@ from Screens.forgot_password_screen import ForgotPasswordScreen
 from Screens.info_screen import InfoScreen
 
 class CampsiteApp(App):
-    """
-    Main application class for the Find a Campsite App.
-    """
 
     def build(self):
         """
         Builds the application by setting up the screen manager and adding screens.
+
+        Returns:
+            ScreenManager: The screen manager configured with all the app screens.
         """
-        # Initialize application logic
+        # Initializes application logic
         self.logic = AppLogic()
 
         # Create the screen manager with NoTransition to disable animations between screens

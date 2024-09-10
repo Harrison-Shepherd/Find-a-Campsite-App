@@ -2,7 +2,8 @@ import redis
 
 def handle_redis_errors(func):
     """
-    Decorator to handle Redis connection errors for Redis operations.
+    Decorator to handle Redis connection errors and other general exceptions
+    during Redis operations.
 
     Args:
         func (function): The function to wrap with error handling.
@@ -13,6 +14,7 @@ def handle_redis_errors(func):
     """
     def wrapper(*args, **kwargs):
         try:
+            # Execute the wrapped function
             return func(*args, **kwargs)
         except redis.ConnectionError as e:
             # Handle Redis-specific connection errors

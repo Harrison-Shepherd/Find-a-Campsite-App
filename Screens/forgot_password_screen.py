@@ -5,13 +5,24 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.image import Image
 from kivy.app import App
-from GUI.gui_helpers import create_button, show_popup
-from GUI.gui_helpers import create_exit_button, create_help_button
+from GUI.gui_helpers import create_button, show_popup, create_exit_button, create_help_button
 
 class ForgotPasswordScreen(Screen):
-    """Screen for handling the password reset process."""
+    """
+    Screen for handling the password reset process.
+    
+    Guides the user through multiple stages: verifying the account, answering
+    a security question, and resetting the password.
+    """
 
     def __init__(self, logic, **kwargs):
+        """
+        Initializes the Forgot Password screen with form inputs and navigation buttons.
+
+        Args:
+            logic: The application logic handler for processing password resets.
+            **kwargs: Additional keyword arguments for the Screen.
+        """
         super(ForgotPasswordScreen, self).__init__(**kwargs)
         self.logic = logic
         self.stage = 1  # Track the current stage of the reset process
@@ -32,7 +43,7 @@ class ForgotPasswordScreen(Screen):
         self.title_label = Label(text="Forgot Password", font_size=28, size_hint=(1, 0.1))
         self.form_layout.add_widget(self.title_label)
 
-        # Input fields
+        # Input fields for the reset process
         self.login_input = TextInput(
             hint_text="Enter login name (email)",
             multiline=False,
@@ -81,20 +92,22 @@ class ForgotPasswordScreen(Screen):
         self.add_widget(layout)
 
     def handle_submit(self, instance):
-        """Handles form submissions based on the current stage."""
+        """
+        Handles form submissions based on the current stage of the process.
+        """
         if self.stage == 1:
-            # Stage 1: Verify login name and fetch the security question
+            #Verify login name and fetch the security question
             login_name = self.login_input.text
             security_question, error_message = self.logic.handle_forgot_password(login_name)
 
             if error_message:
                 show_popup("Error", error_message)
             else:
-                # Check if the security question exists; if not, use the default question
+                # If the security question is missing, use a default question
                 if not security_question:
                     security_question = "What is the name of your first pet?"
-                    
-                # Move to Stage 2: Display security question
+
+                #Display the security question
                 self.stage = 2
                 self.title_label.text = security_question
                 self.remove_widget_from_parent(self.login_input)
@@ -104,10 +117,10 @@ class ForgotPasswordScreen(Screen):
                 self.form_layout.add_widget(self.back_button)
 
         elif self.stage == 2:
-            # Stage 2: Validate the security answer
+            #Validate the security answer
             user_answer = self.security_answer_input.text
             if self.logic.verify_security_answer(self.login_input.text, user_answer):
-                # Move to Stage 3: Reset password
+                #Reset password
                 self.stage = 3
                 self.title_label.text = "Reset Your Password"
                 self.remove_widget_from_parent(self.security_answer_input)
@@ -120,7 +133,7 @@ class ForgotPasswordScreen(Screen):
                 show_popup("Error", "Incorrect security answer.")
 
         elif self.stage == 3:
-            # Stage 3: Update the password
+            # Update the password
             new_password = self.new_password_input.text
             confirm_password = self.confirm_password_input.text
             if new_password != confirm_password:
@@ -133,7 +146,9 @@ class ForgotPasswordScreen(Screen):
                 self.go_back_to_main(None)
 
     def go_back_to_main(self, instance):
-        """Resets the form and navigates back to the main menu."""
+        """
+        Resets the form and navigates back to the main menu.
+        """
         self.clear_inputs()
         self.stage = 1
         self.title_label.text = "Forgot Password"
@@ -159,7 +174,12 @@ class ForgotPasswordScreen(Screen):
         self.confirm_password_input.text = ""
 
     def remove_widget_from_parent(self, widget):
-        """Safely remove a widget from its parent layout."""
+        """
+        Safely remove a widget from its parent layout.
+
+        Args:
+            widget: The widget to be removed.
+        """
         if widget.parent:
             widget.parent.remove_widget(widget)
 

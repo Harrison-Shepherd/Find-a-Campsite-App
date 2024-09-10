@@ -2,7 +2,7 @@ import bcrypt
 from Models.redis_client import RedisClient
 from Models.account import Account
 from Utils.data_loader import DataLoader
-from GUI.gui_helpers import show_popup  # Ensure correct import of the show_popup function
+from GUI.gui_helpers import show_popup
 
 class AppLogic:
     """
@@ -14,7 +14,7 @@ class AppLogic:
         Initializes the application logic by setting up the Redis client and account manager.
         """
         try:
-            # Initialize Redis client and account manager
+            # Initialize Redis client with connection details and set up account manager
             self.redis_client = RedisClient(
                 host='mycampsiteredis.redis.cache.windows.net',
                 port=6380,
@@ -23,15 +23,15 @@ class AppLogic:
             ).client
             self.account_manager = Account(self.redis_client)
 
-            # Optional: Load initial data from a CSV file
+            # Load initial data if needed #NOTE CSV data is not in the root folder, if you want to test on that, take it out of the Assets folder, this is due to a startup lag from encryption the CSV data and fixing the security questions. No lag if you dont load the csv
             self.load_initial_data()
 
-        except Exception as e:
+        except Exception as e: 
             show_popup("Connection Error", f"Failed to connect to Redis: {e}")
 
     def load_initial_data(self):
         """
-        Loads initial test data into Redis from a CSV file for testing purposes.
+        Loads initial test data into Redis from a CSV file for testing purposes. NOTE it is currently in Assets, drag into root next to gui_main.py to test.
         """
         try:
             data_loader = DataLoader(self.redis_client)
@@ -64,7 +64,7 @@ class AppLogic:
             if self.redis_client.hexists(login_name, 'password'):
                 return False, "Account already exists."
 
-            # Proceed with account creation
+            # Create the new account
             self.account_manager.create_account(login_name, password, first_name, security_question, security_answer)
             return True, "Account created successfully."
 
@@ -103,16 +103,16 @@ class AppLogic:
         if not login_name:
             return None, "Login name is required."
 
-        # Fetch the security question from Redis
+        # Grabs the security question from Redis
         security_question = self.redis_client.hget(login_name, 'security_question')
         security_answer = self.redis_client.hget(login_name, 'security_answer')
 
         if not self.redis_client.exists(login_name):
             return None, "Account does not exist."
 
-        # Check if the security question exists; if not, provide a default question
+        # Provide a default security question if none is set NOTE this is for test data
         if not security_question and security_answer:
-            security_question = "What is the name of your first pet?"  # Default question if not set
+            security_question = "What is the name of your first pet?"  # Default question
 
         if security_question:
             return security_question, None

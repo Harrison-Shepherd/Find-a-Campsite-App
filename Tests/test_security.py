@@ -5,7 +5,7 @@ import time
 from Models.account import Account
 from Models.redis_client import RedisClient
 
-# Configure logging
+# Configure logging to display DEBUG level messages
 logging.basicConfig(level=logging.DEBUG)
 
 def delayed_input(prompt_sequence):
@@ -104,7 +104,10 @@ class TestPasswordReset(unittest.TestCase):
         self.assertFalse(result)
 
     def test_reset_password_mismatched_confirmation(self):
-        """Test password reset when new passwords do not match."""
+        """
+        Test password reset when new passwords do not match.
+        Ensures that mismatched passwords result in a failed reset.
+        """
         self.account_manager.create_account(
             "testuser@gmail.com",
             "testpw123",

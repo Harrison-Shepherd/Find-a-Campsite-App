@@ -10,18 +10,25 @@ from Screens.info_screen import InfoScreen
 
 # Set the application title and window properties
 Window.title = "Find a Campsite App"
-Window.size = (1280, 720)  # Set window size
-Window.left = (Window.system_size[0] - Window.size[0]) // 2  # Center window horizontally
-Window.top = (Window.system_size[1] - Window.size[1]) // 2   # Center window vertically
-Window.resizable = True  # Allow window resizing
+Window.size = (1280, 720)  # Set the initial window size
+Window.left = (Window.system_size[0] - Window.size[0]) // 2  # Centre the window horizontally
+Window.top = (Window.system_size[1] - Window.size[1]) // 2   # Centre the window vertically
+Window.resizable = True  # Allow the window to be resized
 
 class CampsiteApp(App):
-    """Main application class for managing the screens and app logic."""
+    """
+    Main application class for managing the screens and app logic.
+    """
 
     def build(self):
-        """Sets up the screen manager and adds all screens to it."""
+        """
+        Sets up the screen manager and adds all screens to it.
+
+        Returns:
+            ScreenManager: The screen manager instance with all app screens added.
+        """
         self.logic = AppLogic()  # Initialize application logic
-        self.screen_manager = ScreenManager(transition=NoTransition())  # No screen transition animations
+        self.screen_manager = ScreenManager(transition=NoTransition())  # Screen manager with no transition animations
 
         # Add screens to the screen manager
         self.screen_manager.add_widget(MainMenuScreen(name='main'))

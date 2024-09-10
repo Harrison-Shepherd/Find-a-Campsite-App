@@ -5,17 +5,24 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.image import Image
 from kivy.app import App
-from GUI.gui_helpers import create_button, show_popup
-from GUI.gui_helpers import create_exit_button, create_help_button
-
+from GUI.gui_helpers import create_button, show_popup, create_exit_button, create_help_button
 
 class LoginScreen(Screen):
     """
     Screen for user login.
-    Allows users to enter their credentials and access the app. Also provides navigation to other sections.
+    
+    Allows users to enter their credentials and access the app. 
+    Also provides navigation to other sections such as the main menu and information screen.
     """
 
     def __init__(self, logic, **kwargs):
+        """
+        Initializes the Login Screen with input fields and buttons.
+
+        Args:
+            logic: The application logic handler for processing login attempts.
+            **kwargs: Additional keyword arguments for the Screen.
+        """
         super(LoginScreen, self).__init__(**kwargs)
         self.logic = logic
         layout = FloatLayout()
@@ -24,7 +31,7 @@ class LoginScreen(Screen):
         self.background = Image(source="Assets/background.jpg", allow_stretch=True, keep_ratio=False)
         layout.add_widget(self.background)
 
-        # Create form layout for login inputs and buttons
+        # Create a form layout for login inputs and buttons
         form_layout = BoxLayout(
             orientation='vertical',
             padding=20,
@@ -34,7 +41,7 @@ class LoginScreen(Screen):
         )
         form_layout.add_widget(Label(text="Login", font_size=28, size_hint=(1, 0.1)))
 
-        # Create input fields for login
+        # Input fields for login name and password
         self.login_input = TextInput(
             hint_text="Enter login name (email)",
             multiline=False,
@@ -57,11 +64,14 @@ class LoginScreen(Screen):
         form_layout.add_widget(create_button("Submit", (1, 0.1), {}, self.handle_login))
         form_layout.add_widget(create_button("Back to Main Menu", (1, 0.1), {}, self.go_back_to_main))
 
+        # Add the form layout to the main layout
         layout.add_widget(form_layout)
+
         # Add standardized exit and help buttons
         layout.add_widget(create_exit_button(self.exit_app))
         layout.add_widget(create_help_button(self.go_to_info))
 
+        # Add the complete layout to the screen
         self.add_widget(layout)
 
     def handle_login(self, instance):

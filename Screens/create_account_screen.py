@@ -5,15 +5,24 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.uix.image import Image
 from kivy.app import App
-from GUI.gui_helpers import create_button, show_popup
-from GUI.gui_helpers import create_exit_button, create_help_button
-
-
+from GUI.gui_helpers import create_button, show_popup, create_exit_button, create_help_button
 
 class CreateAccountScreen(Screen):
-    """Screen for creating a new account."""
+    """
+    Screen for creating a new account.
+
+    Provides input fields for user details and handles account creation
+    by interacting with the application logic.
+    """
 
     def __init__(self, logic, **kwargs):
+        """
+        Initializes the Create Account screen with form inputs and navigation buttons.
+
+        Args:
+            logic: The application logic handler for processing account creation.
+            **kwargs: Additional keyword arguments for the Screen.
+        """
         super(CreateAccountScreen, self).__init__(**kwargs)
         self.logic = logic
         layout = FloatLayout()
@@ -83,10 +92,10 @@ class CreateAccountScreen(Screen):
 
         # Add form layout and other navigation buttons to the main layout
         layout.add_widget(form_layout)
-        # Inside the screen class, replace the button creation with the standardized functions
         layout.add_widget(create_exit_button(self.exit_app))
         layout.add_widget(create_help_button(self.go_to_info))
 
+        # Add the complete layout to the screen
         self.add_widget(layout)
 
     def clear_inputs(self):
@@ -108,7 +117,9 @@ class CreateAccountScreen(Screen):
         security_question = self.security_question_input.text
         security_answer = self.security_answer_input.text
 
-        success, message = self.logic.create_account(login_name, password, first_name, security_question, security_answer)
+        success, message = self.logic.create_account(
+            login_name, password, first_name, security_question, security_answer
+        )
         show_popup("Success" if success else "Error", message)
 
     def go_back_to_main(self, instance):

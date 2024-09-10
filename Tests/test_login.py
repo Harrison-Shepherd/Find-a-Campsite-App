@@ -4,9 +4,15 @@ from Models.account import Account
 from Models.redis_client import RedisClient
 
 class TestAccountLogin(unittest.TestCase):
+    """
+    Unit tests for the Account login functionality.
+    """
 
     def setUp(self):
-        """Set up Redis client and create Account instance for testing."""
+        """
+        Set up Redis client and create Account instance for testing.
+        Initializes test data in Redis with a predefined account.
+        """
         self.redis_client = RedisClient(
             host="mycampsiteredis.redis.cache.windows.net",
             port=6380,
@@ -16,7 +22,7 @@ class TestAccountLogin(unittest.TestCase):
         self.account_manager = Account(self.redis_client)
         self.clear_redis_data()
 
-        # Pre-hash the password to simulate how it's stored
+        # Pre-hash the password to simulate stored credentials
         hashed_password = bcrypt.hashpw("testpw123".encode('utf-8'), bcrypt.gensalt())
         self.redis_client.hset("testuser@gmail.com", mapping={
             'password': hashed_password.decode('utf-8'),
@@ -25,7 +31,9 @@ class TestAccountLogin(unittest.TestCase):
         })
 
     def clear_redis_data(self):
-        """Clear existing Redis data to prevent test interference."""
+        """
+        Clear all existing Redis data to ensure tests do not interfere with each other.
+        """
         for key in self.redis_client.keys('*'):
             self.redis_client.delete(key)
 
@@ -40,17 +48,17 @@ class TestAccountLogin(unittest.TestCase):
         self.assertFalse(result, "Login should fail with incorrect password.")
 
     def test_password_with_trailing_spaces(self):
-        """Test login with correct password but with trailing spaces."""
+        """Test login with a correct password but with trailing spaces."""
         result = self.account_manager.login("testuser@gmail.com", "testpw123 ")
         self.assertFalse(result, "Login should fail if the password has trailing spaces.")
 
     def test_password_with_leading_spaces(self):
-        """Test login with correct password but with leading spaces."""
+        """Test login with a correct password but with leading spaces."""
         result = self.account_manager.login("testuser@gmail.com", " testpw123")
         self.assertFalse(result, "Login should fail if the password has leading spaces.")
 
     def test_password_case_sensitivity(self):
-        """Test login with correct password but with altered case."""
+        """Test login with a correct password but with altered case."""
         result = self.account_manager.login("testuser@gmail.com", "TestPW123")
         self.assertFalse(result, "Login should fail if the password case does not match.")
 
@@ -70,7 +78,9 @@ class TestAccountLogin(unittest.TestCase):
         self.assertFalse(result, "Login should fail for a nonexistent account.")
 
     def tearDown(self):
-        """Clean up Redis data after each test."""
+        """
+        Clean up Redis data after each test to ensure a fresh start for the next test.
+        """
         self.clear_redis_data()
 
 if __name__ == '__main__':

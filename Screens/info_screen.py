@@ -8,9 +8,17 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import Color, Rectangle
 
 class InfoScreen(Screen):
-    """Screen displaying app information."""
+    """
+    Screen displaying app information and instructions on how to use the app.
+    """
 
     def __init__(self, **kwargs):
+        """
+        Initializes the Info Screen with informational text and navigation options.
+
+        Args:
+            **kwargs: Additional keyword arguments for the Screen.
+        """
         super(InfoScreen, self).__init__(**kwargs)
         layout = FloatLayout()
 
@@ -19,7 +27,11 @@ class InfoScreen(Screen):
         layout.add_widget(self.background)
 
         # BoxLayout for the text with a semi-transparent background
-        text_box = BoxLayout(orientation='vertical', size_hint=(0.8, 0.5), pos_hint={'center_x': 0.5, 'center_y': 0.5})
+        text_box = BoxLayout(
+            orientation='vertical',
+            size_hint=(0.8, 0.5),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+        )
 
         # Add a semi-transparent grey background behind the text
         with text_box.canvas.before:
@@ -42,14 +54,14 @@ class InfoScreen(Screen):
             halign='center',
             valign='middle',
             size_hint=(1, 1),
-            color=(1, 1, 1, 1)  # Text color
+            color=(1, 1, 1, 1)  # White text color
         )
         text_box.add_widget(info_label)
 
         # Add text box to the layout
         layout.add_widget(text_box)
 
-        # Add the back button
+        # Add the back button to navigate back to the main menu
         back_button = Button(
             text="Back to Main Menu",
             size_hint=(0.2, 0.1),
@@ -58,12 +70,20 @@ class InfoScreen(Screen):
         )
         layout.add_widget(back_button)
 
+        # Add the complete layout to the screen
         self.add_widget(layout)
 
     def _update_rect(self, instance, value):
-        """Update the background rectangle size and position."""
+        """
+        Update the background rectangle's size and position to match the BoxLayout.
+
+        Args:
+            instance: The widget instance (BoxLayout) being updated.
+            value: The new size or position value triggering the update.
+        """
         self.rect.pos = instance.pos
         self.rect.size = instance.size
 
     def go_back_to_main(self, instance):
+        """Navigate back to the main menu screen."""
         self.manager.current = 'main'

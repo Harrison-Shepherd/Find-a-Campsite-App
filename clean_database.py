@@ -1,12 +1,11 @@
 from Models.redis_client import RedisClient
 
-
 def clean_redis_database():
     """
     Cleans the Redis database by deleting all keys.
     """
     try:
-        # Initialize Redis Client
+        # Initialize the Redis client with connection parameters
         redis_client = RedisClient(
             host='mycampsiteredis.redis.cache.windows.net',
             port=6380,

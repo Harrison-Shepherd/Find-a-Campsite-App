@@ -48,7 +48,7 @@ class RedisClient:
     @handle_redis_errors
     def hgetall(self, key):
         """
-        Retrieves all fields and values of a hash stored at key.
+        Retrieves all fields and values of a hash stored at the specified key.
 
         Args:
             key (str): The key of the hash.
@@ -61,7 +61,7 @@ class RedisClient:
     @handle_redis_errors
     def hget(self, key, field):
         """
-        Retrieves the value associated with the field in the hash stored at key.
+        Retrieves the value associated with a field in the hash stored at the specified key.
 
         Args:
             key (str): The key of the hash.
@@ -75,7 +75,7 @@ class RedisClient:
     @handle_redis_errors
     def hset(self, key, mapping):
         """
-        Sets the specified fields to their respective values in the hash stored at key.
+        Sets specified fields to their respective values in the hash stored at the specified key.
 
         Args:
             key (str): The key of the hash.
@@ -101,13 +101,13 @@ class RedisClient:
 
     def keys(self, pattern="*"):
         """
-        Lists all keys matching a pattern.
+        Lists all keys matching a given pattern.
 
         Args:
-            pattern (str): The pattern to match keys.
+            pattern (str): The pattern to match keys. Defaults to '*' (all keys).
 
         Returns:
-            list: List of matching keys.
+            list: A list of matching keys.
         """
         try:
             return self.client.keys(pattern) if self.client else []
